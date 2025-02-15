@@ -6,6 +6,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.turingmusicplayer.databinding.MusicItemsBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MusicAdapter(
     private val mContext: Context,
@@ -23,13 +27,17 @@ class MusicAdapter(
         val musicFile = mFiles[position]
         holder.binding.apply {
             musicFileName.text = musicFile.title
-            val image = getAlbumArt(musicFile.path)
-            if (image != null) {
-                Glide.with(mContext).asBitmap()
-                    .load(image)
-                    .into(musicImg)
-            } else {
-                musicImg.setImageResource(R.drawable.music)
+            CoroutineScope(Dispatchers.Main).launch {
+                val image = withContext(Dispatchers.IO) {
+                    getAlbumArt(musicFile.path)
+                }
+                if (image != null) {
+                    Glide.with(mContext).asBitmap()
+                        .load(image)
+                        .into(musicImg)
+                } else {
+                    musicImg.setImageResource(R.drawable.music)
+                }
             }
         }
     }
